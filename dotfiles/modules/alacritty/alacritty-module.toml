@@ -1,0 +1,7 @@
+files = [{ src = "alacritty.toml", dest = ".config/alacritty/" }]
+
+[packages]
+pacman = ["alacritty"]
+
+[scripts]
+build = ["install_alacritty.sh"]

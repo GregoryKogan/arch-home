@@ -1,0 +1,11 @@
+imports = ["../modules/alacritty/alacritty-module.toml"]
+
+files = [{ src = "myconf.yaml", dest = ".config/" }]
+
+[packages]
+pacman = ["git", "python", "yay"]
+aur = ["something"]
+
+[scripts]
+build = ["download_themes.sh"]
+user = ["github-ssh.sh"]
