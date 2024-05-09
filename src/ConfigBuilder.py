@@ -7,7 +7,7 @@ class ConfigBuilder:
         self.config_files = []
 
         self.files = []
-        self.build_scripts = set()
+        self.build_scripts = []
         self.user_scripts = set()
 
         self.logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ class ConfigBuilder:
                     [{"src": self.abs_path(file["src"], conf), "dest": file["dest"]}]
                 )
 
-            self.build_scripts.update(
+            self.build_scripts.extend(
                 [
                     self.abs_path(script, conf)
                     for script in data.get("scripts", {}).get("build", [])
@@ -49,7 +49,7 @@ class ConfigBuilder:
         return {
             "files": self.files,
             "scripts": {
-                "build": list(self.build_scripts),
+                "build": self.remove_duplicates_with_order(self.build_scripts),
                 "user": list(self.user_scripts),
             },
         }
@@ -83,3 +83,7 @@ class ConfigBuilder:
                 return tomllib.load(f)
         except FileNotFoundError as e:
             raise FileNotFoundError(f"File not found: {conf}") from e
+    
+    def remove_duplicates_with_order(self, seq):
+        seen = set()
+        return [x for x in seq if x not in seen and not seen.add(x)]
