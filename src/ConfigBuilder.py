@@ -36,13 +36,13 @@ class ConfigBuilder:
             self.build_scripts.update(
                 [
                     self.abs_path(script, conf)
-                    for script in data.get("scripts").get("build", [])
+                    for script in data.get("scripts", {}).get("build", [])
                 ]
             )
             self.user_scripts.update(
                 [
                     self.abs_path(script, conf)
-                    for script in data.get("scripts").get("user", [])
+                    for script in data.get("scripts", {}).get("user", [])
                 ]
             )
 
