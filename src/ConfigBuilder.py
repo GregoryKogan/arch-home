@@ -8,51 +8,48 @@ class ConfigBuilder:
         self.config_files = []
 
         self.files = []
-        self.pacman_packages = []
-        self.aur_packages = []
-        self.build_scripts = []
-        self.user_scripts = []
+        self.pacman_packages = set()
+        self.aur_packages = set()
+        self.build_scripts = set()
+        self.user_scripts = set()
     
     def build(self):
-        self.collect_config_files()
+        try:
+            self.collect_config_files()
+        except FileNotFoundError as e:
+            raise e
         
         for conf in self.config_files:
-            try:
-                with open(conf, 'rb') as f:
-                    data = tomllib.load(f)
-            except FileNotFoundError:
-                print(f'File not found: {conf}')
+            data = self.load_file(conf)
+
+            if data is None:
                 continue
 
             for file in data.get('files', []):
-                file['src'] = self.abs_path(file['src'], conf)
-                self.files.append(file)
+                if 'src' not in file:
+                    raise KeyError(f"'src' key not found for file: {file}")
+                if 'dest' not in file:
+                    raise KeyError(f"'dest' key not found for file: {file}")
+                self.files.extend([{
+                    "src": self.abs_path(file['src'], conf),
+                    "dest": file['dest']
+                }])
             
-            self.pacman_packages.extend(data.get('packages').get('pacman', []))
-            self.aur_packages.extend(data.get('packages').get('aur', []))
+            self.pacman_packages.update(data.get('packages').get('pacman', []))
+            self.aur_packages.update(data.get('packages').get('aur', []))
 
-            build_scripts = data.get('scripts').get('build', [])
-            for script in build_scripts:
-                self.build_scripts.append(self.abs_path(script, conf))
-            
-            user_scripts = data.get('scripts').get('user', [])
-            for script in user_scripts:
-                self.user_scripts.append(self.abs_path(script, conf))
-
-        self.pacman_packages = list(set(self.pacman_packages))
-        self.aur_packages = list(set(self.aur_packages))
-        self.build_scripts = list(set(self.build_scripts))
-        self.user_scripts = list(set(self.user_scripts))
+            self.build_scripts.update([self.abs_path(script, conf) for script in data.get('scripts').get('build', [])])
+            self.user_scripts.update([self.abs_path(script, conf) for script in data.get('scripts').get('user', [])])
         
         return {
             'files': self.files,
             'packages': {
-                'pacman': self.pacman_packages,
-                'aur': self.aur_packages
+                'pacman': list(self.pacman_packages),
+                'aur': list(self.aur_packages)
             },
             'scripts': {
-                'build': self.build_scripts,
-                'user': self.user_scripts
+                'build': list(self.build_scripts),
+                'user': list(self.user_scripts)
             }
         }
 
@@ -76,11 +73,13 @@ class ConfigBuilder:
         return os.path.normpath(os.path.join(os.path.dirname(parent), rel_path))
 
     def read_imports(self, conf):
+        data = self.load_file(conf)
+        
+        return data.get('imports', []) if data else []
+
+    def load_file(self, conf):
         try:
             with open(conf, 'rb') as f:
-                data = tomllib.load(f)
-        except FileNotFoundError:
-            print(f'File not found: {conf}')
-            return []
-        
-        return data.get('imports', [])
+                return tomllib.load(f)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(f'File not found: {conf}') from e
