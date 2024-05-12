@@ -20,7 +20,7 @@ class ConfigFile:
         return self.__data
 
     def load(self) -> None:
-        logger.info(f"Loading config file: {self.__path}")
+        logger.debug(f"Loading config file: {self.__path}")
         try:
             with open(self.__path, "rb") as f:
                 self.__data = tomllib.load(f)
