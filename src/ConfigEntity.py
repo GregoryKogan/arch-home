@@ -118,7 +118,7 @@ class ConfigEntity:
             raise ValueError(f"Host not found: {self.config_file.path}")
 
     @staticmethod
-    def absolute_path(relative_path, parent):
+    def absolute_path(relative_path, parent) -> str:
         return os.path.normpath(os.path.join(os.path.dirname(parent), relative_path))
 
     @staticmethod

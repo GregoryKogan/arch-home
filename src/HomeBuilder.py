@@ -17,7 +17,7 @@ class HomeBuilder:
         self.__build_scripts_queue = []
         self.__user_scripts_queue = []
 
-    def build(self):
+    def build(self) -> None:
         logger.info("Building home directory")
         self.__populate_queues()
         self.__link_pre_files()
@@ -25,7 +25,7 @@ class HomeBuilder:
         self.__link_post_files()
         self.__link_user_scripts()
 
-    def __populate_queues(self):
+    def __populate_queues(self) -> None:
         logger.debug("Populating queues")
         config_entities_queue = [self.__config_entity]
         while len(config_entities_queue):
@@ -47,12 +47,12 @@ class HomeBuilder:
 
         self.__build_scripts_queue.sort(key=lambda script: script.stage)
 
-    def __link_pre_files(self):
+    def __link_pre_files(self) -> None:
         logger.info("Pre-linking files")
         for file_link in self.__link_pre_queue:
             self.link_file(file_link)
 
-    def __run_build_scripts(self):
+    def __run_build_scripts(self) -> None:
         logger.info("Running build scripts")
 
         cur_stage = self.__build_scripts_queue[0].stage
@@ -66,12 +66,12 @@ class HomeBuilder:
             content = script.text if script.text is not None else script.source
             subprocess.run([content], check=True, shell=True)
 
-    def __link_post_files(self):
+    def __link_post_files(self) -> None:
         logger.info("Post-linking files")
         for file_link in self.__link_post_queue:
             self.link_file(file_link)
 
-    def __link_user_scripts(self):
+    def __link_user_scripts(self) -> None:
         logger.info("Linking user scripts")
         script_dir = config().get("user-scripts-bin", "~/.bin")
         os.makedirs(os.path.expanduser(script_dir), mode=0o777, exist_ok=True)
@@ -87,12 +87,12 @@ class HomeBuilder:
         self.check_environment_path()
 
     @staticmethod
-    def link_file(file_link: FileLink):
+    def link_file(file_link: FileLink) -> None:
         logger.info(f"Linking {file_link.full_name}")
         HomeBuilder.force_symlink(file_link.source, file_link.destination)
 
     @staticmethod
-    def force_symlink(source: str, destination: str):
+    def force_symlink(source: str, destination: str) -> None:
         logger.debug(f"Symlink: {destination} -> {source}")
         try:
             if os.path.exists(destination):
@@ -104,7 +104,7 @@ class HomeBuilder:
             ) from e
 
     @staticmethod
-    def check_environment_path():
+    def check_environment_path() -> None:
         script_dir = config().get("user-scripts-bin", "~/.bin")
         full_dir = os.path.expanduser(script_dir)
         if full_dir not in os.environ["PATH"].split(":"):

@@ -73,5 +73,5 @@ class Script:
             raise ValueError(f"Stage must be an integer: {self.name}")
 
     @staticmethod
-    def absolute_path(relative_path, parent):
+    def absolute_path(relative_path, parent) -> str:
         return os.path.normpath(os.path.join(os.path.dirname(parent), relative_path))
