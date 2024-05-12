@@ -1,6 +1,8 @@
 import os
 from src.ConfigFile import ConfigFile
 from src.ProjectConfig import config
+from src.FileLink import FileLink
+from src.Script import Script
 
 
 class ConfigEntity:
@@ -12,8 +14,8 @@ class ConfigEntity:
         self.__hostname = hostname
 
         self.__imports: list[ConfigEntity] = []
-
-        print(f"Building {self.config_file.path}")
+        self.__file_links: list[FileLink] = []
+        self.__scripts: list[Script] = []
 
         self.__build()
 
@@ -28,6 +30,19 @@ class ConfigEntity:
     def __build(self) -> None:
         self.__check_host()
         self.__build_imports()
+        self.__build_file_links()
+        self.__build_scripts()
+
+    def __check_host(self) -> None:
+        self.check_host_existence()
+        if self.hostname is not None:
+            return
+
+        host_config = self.config_file.data["host"]
+        host_name = host_config.get("name", None)
+        if host_name is None:
+            raise ValueError(f"Host name not found: {self.config_file.path}")
+        self.__hostname = host_name
 
     def __build_imports(self) -> None:
         relative_imports = self.config_file.data.get("imports", [])
@@ -54,16 +69,33 @@ class ConfigEntity:
             for imp in absolute_imports
         ]
 
-    def __check_host(self) -> None:
-        self.check_host_existence()
-        if self.hostname is not None:
-            return
+    def __build_file_links(self) -> None:
+        files = self.config_file.data.get("files", {})
+        host_files = self.config_file.data.get(self.hostname, {}).get("files", {})
 
-        host_config = self.config_file.data["host"]
-        host_name = host_config.get("name", None)
-        if host_name is None:
-            raise ValueError(f"Host name not found: {self.config_file.path}")
-        self.__hostname = host_name
+        self.__file_links = [
+            FileLink(name, data, self.config_file.path)
+            for name, data in {**files, **host_files}.items()
+        ]
+
+    def __build_scripts(self) -> None:
+        scripts = self.config_file.data.get("scripts", {})
+        host_scripts = self.config_file.data.get(self.hostname, {}).get("scripts", {})
+
+        self.__scripts = [
+            Script(name, data, self.config_file.path)
+            for name, data in {**scripts, **host_scripts}.items()
+        ]
+
+    def check_host_existence(self) -> None:
+        host_config = self.config_file.data.get("host", None)
+        imported = self.hostname is not None
+
+        if imported and host_config is not None:
+            raise ValueError(f"Host can't be imported: {self.config_file.path}")
+
+        if not imported and host_config is None:
+            raise ValueError(f"Host not found: {self.config_file.path}")
 
     @staticmethod
     def absolute_path(relative_path, parent):
@@ -76,13 +108,3 @@ class ConfigEntity:
             imp if imp.endswith(".toml") else os.path.join(imp, default_module_filename)
             for imp in imports
         ]
-
-    def check_host_existence(self) -> None:
-        host_config = self.config_file.data.get("host", None)
-        imported = self.hostname is not None
-
-        if imported and host_config is not None:
-            raise ValueError(f"Host can't be imported: {self.config_file.path}")
-
-        if not imported and host_config is None:
-            raise ValueError(f"Host not found: {self.config_file.path}")
