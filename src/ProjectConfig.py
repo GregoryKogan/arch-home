@@ -1,5 +1,7 @@
+import os
 from src.ConfigFile import ConfigFile
 
 
 def config() -> dict:
-    return ConfigFile("config.toml").data
+    config_path = os.path.join(os.path.dirname(__file__), "../config.toml")
+    return ConfigFile(config_path).data
