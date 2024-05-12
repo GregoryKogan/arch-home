@@ -6,6 +6,13 @@ import sys, argparse
 parser = argparse.ArgumentParser(prog="Universal Home Builder")
 parser.add_argument("config", type=str, help="Path to the entry config file")
 parser.add_argument(
+    "--log-level",
+    type=str,
+    choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+    default="INFO",
+    help="Set the logging level",
+)
+parser.add_argument(
     "--show-exceptions",
     action="store_true",
     help="Show exceptions in the output for debugging purposes",
@@ -18,9 +25,9 @@ import logging
 from src.LoggingFormatter import Formatter
 
 logger = logging.getLogger("Universal Home Builder")
-logger.setLevel(logging.INFO)
+logger.setLevel(args.log_level)
 handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
+handler.setLevel(args.log_level)
 handler.setFormatter(Formatter())
 logger.addHandler(handler)
 

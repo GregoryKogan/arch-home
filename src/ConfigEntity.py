@@ -1,8 +1,11 @@
-import os
+import os, logging
 from src.ConfigFile import ConfigFile
 from src.ProjectConfig import config
 from src.FileLink import FileLink
 from src.Script import Script
+
+
+logger = logging.getLogger("Universal Home Builder")
 
 
 class ConfigEntity:
@@ -40,12 +43,14 @@ class ConfigEntity:
         return self.__scripts
 
     def __build(self) -> None:
+        logger.debug(f"Building ConfigEntity: {self.config_file.path}")
         self.__check_host()
         self.__build_imports()
         self.__build_file_links()
         self.__build_scripts()
 
     def __check_host(self) -> None:
+        logger.debug(f"Checking host: {self.config_file.path}")
         self.check_host_existence()
         if self.hostname is not None:
             return
@@ -57,6 +62,7 @@ class ConfigEntity:
         self.__hostname = host_name
 
     def __build_imports(self) -> None:
+        logger.debug(f"Building imports: {self.config_file.path}")
         relative_imports = self.config_file.data.get("imports", [])
         relative_imports = self.join_default_module_path(relative_imports)
 
@@ -82,6 +88,7 @@ class ConfigEntity:
         ]
 
     def __build_file_links(self) -> None:
+        logger.debug(f"Building file links: {self.config_file.path}")
         files = self.config_file.data.get("files", {})
         host_files = self.config_file.data.get(self.hostname, {}).get("files", {})
 
@@ -91,6 +98,7 @@ class ConfigEntity:
         ]
 
     def __build_scripts(self) -> None:
+        logger.debug(f"Building scripts: {self.config_file.path}")
         scripts = self.config_file.data.get("scripts", {})
         host_scripts = self.config_file.data.get(self.hostname, {}).get("scripts", {})
 
