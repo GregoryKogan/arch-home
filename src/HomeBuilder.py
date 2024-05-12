@@ -89,6 +89,7 @@ class HomeBuilder:
     @staticmethod
     def link_file(file_link: FileLink) -> None:
         logger.info(f"Linking {file_link.full_name}")
+        os.makedirs(os.path.dirname(file_link.destination), exist_ok=True)
         HomeBuilder.force_symlink(file_link.source, file_link.destination)
 
     @staticmethod
