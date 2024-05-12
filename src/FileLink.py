@@ -14,6 +14,10 @@ class FileLink:
         return self.__name
 
     @property
+    def full_name(self) -> str:
+        return f"{os.path.basename(os.path.dirname(self.parent_path))}.{self.name}"
+
+    @property
     def parent_path(self) -> str:
         return self.__parent_path
 

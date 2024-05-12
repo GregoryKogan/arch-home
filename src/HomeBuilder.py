@@ -54,8 +54,15 @@ class HomeBuilder:
 
     def __run_build_scripts(self):
         logger.info("Running build scripts")
+
+        cur_stage = self.__build_scripts_queue[0].stage
+        logger.info(f"Running stage: {cur_stage}")
         for script in self.__build_scripts_queue:
-            logger.info(f"Running build script: {script.name}")
+            if script.stage != cur_stage:
+                cur_stage = script.stage
+                logger.info(f"Running stage: {cur_stage}")
+
+            logger.info(f"Running build script: {script.full_name}")
             content = script.text if script.text is not None else script.source
             subprocess.run([content], check=True, shell=True)
 
@@ -67,7 +74,6 @@ class HomeBuilder:
     def __link_user_scripts(self):
         logger.info("Linking user scripts")
         script_dir = config().get("user-scripts-bin", "~/.bin")
-        logger.warning(f"Don't forget to add {script_dir} to your PATH")
         os.makedirs(os.path.expanduser(script_dir), mode=0o777, exist_ok=True)
 
         for script in self.__user_scripts_queue:
@@ -78,10 +84,12 @@ class HomeBuilder:
             )
             self.force_symlink(script.source, destination)
 
+        logger.warning(f"Don't forget to add {script_dir} to your PATH")
+
     @staticmethod
     def link_file(file_link: FileLink):
-        logger.info(f"Linking {file_link.name}")
-        self.force_symlink(file_link.source, file_link.destination)
+        logger.info(f"Linking {file_link.full_name}")
+        HomeBuilder.force_symlink(file_link.source, file_link.destination)
 
     @staticmethod
     def force_symlink(source: str, destination: str):
