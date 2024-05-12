@@ -4,11 +4,16 @@ from src.ProjectConfig import config
 
 
 class ConfigEntity:
-    def __init__(self, config_file: ConfigFile, hostname: str = None):
+    def __init__(
+        self, config_file: ConfigFile, ancestors: set[str] = None, hostname: str = None
+    ):
         self.__config_file = config_file
+        self.__ancestors = ancestors if ancestors is not None else set()
         self.__hostname = hostname
 
         self.__imports: list[ConfigEntity] = []
+
+        print(f"Building {self.config_file.path}")
 
         self.__build()
 
@@ -24,9 +29,6 @@ class ConfigEntity:
         self.__check_host()
         self.__build_imports()
 
-        for imp in self.__imports:
-            print(imp.config_file.path)
-
     def __build_imports(self) -> None:
         relative_imports = self.config_file.data.get("imports", [])
         relative_imports = self.join_default_module_path(relative_imports)
@@ -34,8 +36,21 @@ class ConfigEntity:
         absolute_imports = [
             self.absolute_path(imp, self.config_file.path) for imp in relative_imports
         ]
+
+        if self.config_file.path in absolute_imports:
+            raise ValueError(f"Self import not allowed: {self.config_file.path}")
+
+        if len(absolute_imports) != len(set(absolute_imports)):
+            raise ValueError(f"Duplicate imports found: {self.config_file.path}")
+
+        if any(imp in self.__ancestors for imp in absolute_imports):
+            raise ValueError(f"Circular imports found: {self.config_file.path}")
+
+        children_ancestors = self.__ancestors | {self.config_file.path}
         self.__imports = [
-            ConfigEntity(ConfigFile(imp), hostname=self.hostname)
+            ConfigEntity(
+                ConfigFile(imp), ancestors=children_ancestors, hostname=self.hostname
+            )
             for imp in absolute_imports
         ]
 
