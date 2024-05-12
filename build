@@ -39,6 +39,7 @@ from src.HomeBuilder import HomeBuilder
 try:
     home_builder = HomeBuilder(ConfigEntity(ConfigFile(args.config)))
     home_builder.build()
+    logger.info("Build successful!")
 except Exception as e:
     logger.error(f"Build failed: {e}")
     if args.show_exceptions:
