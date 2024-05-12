@@ -84,7 +84,7 @@ class HomeBuilder:
             )
             self.force_symlink(script.source, destination)
 
-        logger.warning(f"Don't forget to add {script_dir} to your PATH")
+        self.check_environment_path()
 
     @staticmethod
     def link_file(file_link: FileLink):
@@ -102,3 +102,10 @@ class HomeBuilder:
             raise RuntimeError(
                 f"Failed to create symlink: {destination} -> {source}"
             ) from e
+
+    @staticmethod
+    def check_environment_path():
+        script_dir = config().get("user-scripts-bin", "~/.bin")
+        full_dir = os.path.expanduser(script_dir)
+        if full_dir not in os.environ["PATH"].split(":"):
+            logger.warning(f"Don't forget to add {script_dir} to your PATH")
