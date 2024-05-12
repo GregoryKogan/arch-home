@@ -60,6 +60,9 @@ class Script:
         if self.source is not None and not os.path.exists(self.source):
             raise FileNotFoundError(f"Source not found: {self.source}")
 
+        if self.user and not self.source:
+            raise ValueError(f"User script must have a source: {self.name}")
+
         if not isinstance(self.user, bool):
             raise ValueError(f"User must be a boolean: {self.name}")
 
