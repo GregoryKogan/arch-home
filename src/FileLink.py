@@ -28,16 +28,19 @@ class FileLink:
         return os.path.join(os.path.expanduser("~"), relative)
 
     @property
-    def link_pre(self) -> bool:
+    def pre(self) -> bool:
         return self.__data.get("link-pre", True)
 
     @property
-    def link_post(self) -> bool:
+    def post(self) -> bool:
         return self.__data.get("link-post", False)
 
     def __validate(self) -> None:
         if "src" not in self.__data:
             raise ValueError(f"Source not found in FileLink: {self.name}")
+
+        if not os.path.exists(self.source):
+            raise FileNotFoundError(f"Source not found: {self.source}")
 
         if "dest" not in self.__data:
             raise ValueError(f"Destination not found in FileLink: {self.name}")
@@ -48,11 +51,11 @@ class FileLink:
         if not isinstance(self.destination, str):
             raise ValueError(f"Destination must be a string: {self.name}")
 
-        if not isinstance(self.link_pre, bool):
-            raise ValueError(f"Link pre must be a boolean: {self.name}")
+        if not isinstance(self.pre, bool):
+            raise ValueError(f"Link-pre must be a boolean: {self.name}")
 
-        if not isinstance(self.link_post, bool):
-            raise ValueError(f"Link post must be a boolean: {self.name}")
+        if not isinstance(self.post, bool):
+            raise ValueError(f"Link-post must be a boolean: {self.name}")
 
     @staticmethod
     def absolute_path(relative_path, parent):

@@ -27,6 +27,18 @@ class ConfigEntity:
     def hostname(self) -> str:
         return self.__hostname
 
+    @property
+    def imports(self) -> list["ConfigEntity"]:
+        return self.__imports
+
+    @property
+    def file_links(self) -> list[FileLink]:
+        return self.__file_links
+
+    @property
+    def scripts(self) -> list[Script]:
+        return self.__scripts
+
     def __build(self) -> None:
         self.__check_host()
         self.__build_imports()

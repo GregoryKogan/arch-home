@@ -1,1 +1,2 @@
 default-module-filename = "module.toml"
+user-scripts-bin        = "~/.bin"

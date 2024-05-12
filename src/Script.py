@@ -53,6 +53,9 @@ class Script:
         if self.text is not None and not isinstance(self.text, str):
             raise ValueError(f"Text must be a string: {self.name}")
 
+        if self.source is not None and not os.path.exists(self.source):
+            raise FileNotFoundError(f"Source not found: {self.source}")
+
         if not isinstance(self.user, bool):
             raise ValueError(f"User must be a boolean: {self.name}")
 

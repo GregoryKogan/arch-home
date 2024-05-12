@@ -17,9 +17,11 @@ args = parser.parse_args()
 
 from src.ConfigFile import ConfigFile
 from src.ConfigEntity import ConfigEntity
+from src.HomeBuilder import HomeBuilder
 
 try:
-    entry_config = ConfigEntity(ConfigFile(args.config))
+    home_builder = HomeBuilder(ConfigEntity(ConfigFile(args.config)))
+    home_builder.build()
 except Exception as e:
     logger.error(f"Build failed: {e}")
     if args.show_exceptions:
