@@ -93,7 +93,7 @@ class ConfigEntity:
 
         self.__file_links = [
             FileLink(name, data, self.config_file.path)
-            for name, data in {**files, **host_files}.items()
+            for name, data in files.items()
             if self.hostname in data.get("hosts", []) or len(data.get("hosts", [])) == 0
         ]
 
@@ -103,7 +103,7 @@ class ConfigEntity:
 
         self.__scripts = [
             Script(name, data, self.config_file.path)
-            for name, data in {**scripts, **host_scripts}.items()
+            for name, data in scripts.items()
             if self.hostname in data.get("hosts", []) or len(data.get("hosts", [])) == 0
         ]
 
