@@ -32,13 +32,42 @@ handler.setFormatter(Formatter())
 logger.addHandler(handler)
 
 
-from src.ConfigFile import ConfigFile
+import os
+
+
+def run_through_symlink() -> bool:
+    return os.path.islink(os.path.abspath(__file__))
+
+
+from src.Script import Script
 from src.ConfigEntity import ConfigEntity
+
+
+def add_self_to_user_scripts(config: ConfigEntity) -> ConfigEntity:
+    uhb_build_script = Script(
+        "uhbuild",
+        {"src": os.path.basename(__file__), "user": True, "build": False},
+        os.path.abspath(__file__),
+    )
+    config.add_script(uhb_build_script)
+    return config
+
+
+from src.ConfigFile import ConfigFile
 from src.HomeBuilder import HomeBuilder
 
 try:
-    home_builder = HomeBuilder(ConfigEntity(ConfigFile(args.config)))
+    config = ConfigEntity(ConfigFile(args.config))
+
+    if not run_through_symlink():
+        logger.info(
+            "UHB is not run as user script and will add itself to user scripts."
+        )
+        config = add_self_to_user_scripts(config)
+
+    home_builder = HomeBuilder(config)
     home_builder.build()
+
     logger.info("Build successful!")
 except Exception as e:
     logger.error(f"Build failed: {e}")

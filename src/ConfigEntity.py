@@ -42,6 +42,9 @@ class ConfigEntity:
     def scripts(self) -> list[Script]:
         return self.__scripts
 
+    def add_script(self, script: Script) -> None:
+        self.__scripts.append(script)
+
     def __build(self) -> None:
         logger.debug(f"Building ConfigEntity: {self.config_file.path}")
         self.__check_host()
