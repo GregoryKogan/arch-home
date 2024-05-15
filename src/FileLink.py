@@ -22,6 +22,10 @@ class FileLink:
         return self.__parent_path
 
     @property
+    def hosts(self) -> list[str]:
+        return self.__data.get("hosts", [])
+
+    @property
     def source(self) -> str:
         relative = self.__data["src"]
         return self.absolute_path(relative, self.parent_path)

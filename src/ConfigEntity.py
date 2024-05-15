@@ -90,21 +90,21 @@ class ConfigEntity:
     def __build_file_links(self) -> None:
         logger.debug(f"Building file links: {self.config_file.path}")
         files = self.config_file.data.get("files", {})
-        host_files = self.config_file.data.get(self.hostname, {}).get("files", {})
 
         self.__file_links = [
             FileLink(name, data, self.config_file.path)
             for name, data in {**files, **host_files}.items()
+            if self.hostname in data.get("hosts", []) or len(data.get("hosts", [])) == 0
         ]
 
     def __build_scripts(self) -> None:
         logger.debug(f"Building scripts: {self.config_file.path}")
         scripts = self.config_file.data.get("scripts", {})
-        host_scripts = self.config_file.data.get(self.hostname, {}).get("scripts", {})
 
         self.__scripts = [
             Script(name, data, self.config_file.path)
             for name, data in {**scripts, **host_scripts}.items()
+            if self.hostname in data.get("hosts", []) or len(data.get("hosts", [])) == 0
         ]
 
     def check_host_existence(self) -> None:

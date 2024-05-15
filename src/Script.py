@@ -22,6 +22,10 @@ class Script:
         return self.__parent_path
 
     @property
+    def hosts(self) -> list[str]:
+        return self.__data.get("hosts", [])
+
+    @property
     def source(self) -> str:
         if "src" in self.__data:
             relative = self.__data["src"]
