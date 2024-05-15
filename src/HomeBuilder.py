@@ -94,10 +94,29 @@ class HomeBuilder:
 
     @staticmethod
     def force_symlink(source: str, destination: str) -> None:
+        HomeBuilder.remove_existing(destination)
+        HomeBuilder.create_symlink(source, destination)
+
+    @staticmethod
+    def remove_existing(destination: str) -> None:
+        logger.debug(f"Removing existing: {destination}")
+        try:
+            if os.path.lexists(destination):
+                if os.path.islink(destination):
+                    os.unlink(destination)
+                elif os.path.isfile(destination):
+                    os.remove(destination)
+                elif os.path.isdir(destination):
+                    os.rmdir(destination)
+                else:
+                    logger.warning(f"Unknown file type: {destination}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to remove existing: {destination}") from e
+
+    @staticmethod
+    def create_symlink(source: str, destination: str) -> None:
         logger.debug(f"Symlink: {destination} -> {source}")
         try:
-            if os.path.exists(destination):
-                os.remove(destination)
             os.symlink(source, destination)
         except Exception as e:
             raise RuntimeError(
