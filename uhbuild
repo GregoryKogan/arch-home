@@ -15,9 +15,9 @@ parser.add_argument(
 parser.add_argument(
     "--show-exceptions",
     action="store_true",
+    default=False,
     help="Show exceptions in the output for debugging purposes",
 )
-parser.set_defaults(show_exceptions=False)
 args = parser.parse_args()
 
 
